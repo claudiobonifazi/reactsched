@@ -1,0 +1,28 @@
+.rsc_column{
+    position: relative;
+    display: block;
+
+    background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent calc( var(--step-h) - 1px ),
+        var(--linecol) calc( var(--step-h) - 1px ),
+        var(--linecol) var(--step-h)
+    );
+}
+
+.rsc_column::before{
+    content: var(--colname);
+    position: absolute;
+    left: 0;
+    top: calc( var(--step-h) * -1.5 );
+    width: 100%;
+    background-color: var(--bgcol);
+    height: calc( var(--step-h) * 1.5 );
+    line-height: calc( var(--step-h) * 1.5 );
+    user-select: none;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bolder;
+    opacity: 0.667;
+}

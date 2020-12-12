@@ -1,0 +1,12 @@
+.rse_event{
+    position: absolute;
+    left: 0;
+    top:0;
+    width: var(--e-w);
+    height: calc( 
+                var(--step-h) * var(--e-minheight) / var(--step-min)
+            );
+    transform: translate( var(--e-l), var(--e-t) );
+    background-color: var(--e-bgc);
+    color: var(--e-txtc);
+}

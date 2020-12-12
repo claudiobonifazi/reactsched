@@ -1,0 +1,36 @@
+.rs_container{
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--leftcol-w) auto;
+    padding-top: calc( var(--step-h) * 1.5 );
+
+    overflow-x:hidden;
+    overflow-y:auto;
+}
+
+.rs_container .rs_leftCol{
+    display:grid;
+    user-select:none
+}
+
+.rs_container .rs_leftCol .rs_leftColCell{
+    display:block;
+    text-align:center;
+    height: var(--step-h);
+    font-size: 85%;
+    background-image: linear-gradient( 
+            180deg, 
+            var(--linecol),
+            var(--linecol) 1px,
+            transparent 1px,
+            transparent 100%
+        );
+    overflow: hidden;
+    contain: layout;
+}
+
+.rs_container .rs_columns{
+    display:grid;
+    grid-template-columns: repeat( var(--colnum), auto );
+}
+
