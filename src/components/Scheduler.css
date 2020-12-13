@@ -1,24 +1,28 @@
 .rs_container{
+    display:grid;
+    grid-template-rows: max-content auto;
+    height: var(--height);
+}
+
+.rs_body{
     position: relative;
     display: grid;
     grid-template-columns: var(--leftcol-w) auto;
-    /*padding-top: calc( var(--step-h) * 1.5 );*/
-    height: var(--height);
 
     overflow-x:hidden;
     overflow-y:auto;
 }
 
-.rs_container>*{
+.rs_body>*{
     margin-top: calc( var(--step-h) * 1.5 );
 }
 
-.rs_container .rs_leftCol{
+.rs_leftCol{
     display:grid;
     user-select:none
 }
 
-.rs_container .rs_leftCol .rs_leftColCell{
+.rs_leftColCell{
     display:block;
     text-align:center;
     height: var(--step-h);
@@ -34,7 +38,7 @@
     contain: layout;
 }
 
-.rs_container .rs_columns{
+.rs_columns{
     display:grid;
     grid-template-columns: repeat( var(--colnum), auto );
 }

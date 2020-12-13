@@ -26,3 +26,19 @@
     font-weight: bolder;
     opacity: 0.667;
 }
+
+.rsc_column::after{
+    content: "";
+    display:block;
+    width: 100%;
+    height: var(--step-h);
+    background: rgba( 0,0,0,0.1 );
+    position: absolute;
+    left:0;
+    top:0;
+    transform: translate( 0, var(--selcell) );
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+    contain: layout;
+}

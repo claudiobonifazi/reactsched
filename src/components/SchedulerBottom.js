@@ -3,12 +3,12 @@ import React from 'react';
 import "./SchedulerBottom.css";
 
 
-class SchedulerBottom extends React.Component{
+class SchedulerBottom extends React.Component {
 
 
-    render(){
+    render() {
         let html = (
-            <div className="rs_container">
+            <div className="rsb_container">
 
             </div>
         );

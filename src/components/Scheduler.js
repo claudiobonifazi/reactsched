@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 import "./Scheduler.css";
 import SchedulerColumn from "./SchedulerColumn.js";
+import SchedulerTop from "./SchedulerTop.js";
+import SchedulerBottom from "./SchedulerBottom.js";
 
 class Scheduler extends React.Component {
 
@@ -12,7 +14,6 @@ class Scheduler extends React.Component {
         endMin: 24 * 60,
         stepMin: 30,
         eventMinDuration: 15,
-        resizeSnap: false,
         heightPx: window.innerHeight,
         stepHeightPx: 24,
         columns: [
@@ -23,6 +24,10 @@ class Scheduler extends React.Component {
             {
                 id: 2,
                 name: "ciao2"
+            },
+            {
+                id: 3,
+                name: "ciao3"
             }
         ],
         bgColor: "#fff",
@@ -45,21 +50,30 @@ class Scheduler extends React.Component {
         endMin: PropTypes.number,
         stepMin: PropTypes.number,
         eventMinDuration: PropTypes.number,
-        resizeSnap: PropTypes.bool,
         heightPx: PropTypes.number,
         stepHeightPx: PropTypes.number,
         columns: PropTypes.array,
         bgColor: PropTypes.string,
-        horLineColor: PropTypes.string
+        horLineColor: PropTypes.string,
+        events: PropTypes.array
     };
 
     state = {
         selectedDay: new Date(),
+        selectedCell: null,
+        selectedEvent: null,
         events: [],
         view: "day", // "day", "week", "month", "year"
 
         error: ""
     };
+
+    static hideSelection = -9999;
+
+    constructor(props) {
+        super(props);
+        window.test = this;
+    }
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.events !== prevState.events) {
@@ -72,20 +86,29 @@ class Scheduler extends React.Component {
     render() {
         let html = (
             <div className="rs_container" style={this.functionalCSS()}>
-                <div className="rs_leftCol">
-                    {this.leftColumn()}
+                <SchedulerTop selectedDay={this.state.selectedDay}
+                    onDaySelect={this.menuDaySelect.bind(this)} />
+                <div className="rs_body">
+                    <div className="rs_leftCol">
+                        {this.leftColumn()}
+                    </div>
+                    <div className="rs_columns">
+                        {this.props.columns.map((c, i) => {
+                            let e = this.filterEvents(c.id);
+                            return <SchedulerColumn key={i}
+                                {...c}
+                                events={e}
+                                onEventResize={this.onEventResize.bind(this)}
+                                onEventDrag={this.onEventDrag.bind(this)}
+                                selectedDay={this.state.selectedDay}
+                                onClick={this.onColumnClick.bind(this)}
+                                selectedCell={this.passSelectedCellToCol(c.id)}
+                                selectedEvent={this.state.selectedEvent}
+                            />
+                        })}
+                    </div>
                 </div>
-                <div className="rs_columns">
-                    {this.props.columns.map((c, i) => {
-                        let e = this.filterEvents(c.id);
-                        return <SchedulerColumn key={i}
-                            {...c}
-                            events={e}
-                            onEventResize={this.onEventResize.bind(this)}
-                            onEventDrag={this.onEventDrag.bind(this)}
-                        />
-                    })}
-                </div>
+                <SchedulerBottom />
             </div>
         );
         return html;
@@ -127,6 +150,12 @@ class Scheduler extends React.Component {
             &&
             Scheduler.isSameDay(this.state.selectedDay, e.dateStart)
         );
+    }
+
+    static getStartOfDay(d) {
+        let start = new Date(d);
+        start.setHours(0, 0, 0, 0);
+        return start.toISOString();
     }
 
     static isSameDay(d1, d2) {
@@ -205,6 +234,86 @@ class Scheduler extends React.Component {
                 this.props.onEventChanged.apply(this, [id.values]);
             }
         });
+    }
+
+    onColumnClick(e) {
+        let topPos = e.clientY - e.target.getBoundingClientRect().top;
+        let min = (Math.floor(topPos / this.props.stepHeightPx)) * this.props.stepHeightPx;
+        if (min < 0) {
+            min = Scheduler.hideSelection;
+        }
+        let tmp = {
+            selectedCell: {
+                px: min,
+                idColumn: parseInt(e.target.dataset.id)
+            },
+            selectedEvent: null
+        };
+        if (!this.isEmptyClick(e)) {
+            tmp.selectedCell.px = Scheduler.hideSelection;
+            let getEv = this.getClickedEvent(e);
+            if (getEv) {
+                tmp.selectedEvent = parseInt(getEv.dataset.id);
+            }
+        }
+        this.setState(tmp);
+    }
+
+    passSelectedCellToCol(idColumn) {
+        if (this.state.selectedCell && this.state.selectedCell.idColumn === idColumn) {
+            return this.state.selectedCell.px;
+        } else {
+            return Scheduler.hideSelection;
+        }
+    }
+
+    isEmptyClick(e) {
+        let path = e.nativeEvent.path || e.nativeEvent.composedPath();
+        let check = path && path.length
+            && path[0].classList
+            && path[0].classList.contains('rsc_column');
+        return check;
+    }
+
+    getClickedEvent(e) {
+        let path = e.nativeEvent.path || e.nativeEvent.composedPath();
+        for (let i in path) {
+            if (path.hasOwnProperty(i) && path[i].classList && path[i].classList.contains('rse_event')) {
+                return path[i];
+            }
+        }
+        return null;
+    }
+
+    pxToMin(px) {
+        return this.props.stepMin * (px / this.props.stepHeightPx);
+    }
+
+
+    menuDaySelect(data) {
+        this.setState({
+            selectedDay: new Date(data)
+        })
+    }
+
+
+    get selectedDate() {
+        if (this.state.selectedCell) {
+            let tmp = this.state.selectedCell;
+            tmp.date = new Date(Scheduler.getStartOfDay(this.state.selectedDay));
+            tmp.date.setTime(tmp.date.getTime() + this.pxToMin(tmp.px) * 60 * 1000);
+            return tmp;
+        } else {
+            return null;
+        }
+    }
+
+    get selectedEvent() {
+        if (this.state.selectedEvent) {
+            return this.state.events.find(e => e.id === this.state.selectedEvent) || null;
+        } else {
+            return null;
+        }
     }
 
     get events() {

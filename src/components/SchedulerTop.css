@@ -1,0 +1,31 @@
+.rst_navigation{
+    display:grid;
+    grid-template-columns: 1fr max-content 1fr;
+    column-gap: 8px;
+    padding: 8px;
+}
+
+.rst_navigation .rst_nav_menu{
+    display: grid;
+    grid-template-columns: max-content auto max-content;
+    column-gap: 8px;
+}
+
+
+
+.rst_nav_menu_left,
+.rst_nav_menu_right{
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.1);
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+    color: rgba(0,0,0,0.667);
+    cursor: pointer;
+    overflow:hidden;
+    contain: layout;
+    user-select: none;
+}

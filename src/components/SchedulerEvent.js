@@ -50,8 +50,17 @@ class SchedulerEvent extends React.Component {
     render() {
         let html;
         if (!this.state.error) {
+            let classes = ["rse_event"];
+            if (this.props.selected) {
+                classes.push("rse_selected");
+            }
             html = (<>
-                <div className="rse_event" style={this.functionalCSS()} data-id={this.props.id}>
+                <div className={classes.join(' ')}
+                    style={this.functionalCSS()}
+                    data-id={this.props.id}
+                    onDoubleClick={this.openEvent.bind(this)}
+                    onContextMenu={this.openEvent.bind(this)}
+                >
                     <div className="rse_title rse_dragHandle" onMouseDown={this.dragStart.bind(this)}>
                         {this.props.title || ''}
                     </div>
@@ -75,7 +84,7 @@ class SchedulerEvent extends React.Component {
         let left = 0;
         let width = 100;
         let top = Scheduler.minDiff(
-            SchedulerEvent.getStartOfDay(this.props.dateStart),
+            Scheduler.getStartOfDay(this.props.dateStart),
             this.props.dateStart
         );
         let height = Scheduler.minDiff(
@@ -96,12 +105,6 @@ class SchedulerEvent extends React.Component {
         if (new Date(this.props.dateEnd) <= new Date(this.props.dateStart)) {
             this.state.error = "dateEnd lower than dateStart";
         }
-    }
-
-    static getStartOfDay(d) {
-        let start = new Date(d);
-        start.setHours(0, 0, 0, 0);
-        return start.toISOString();
     }
 
     resizeStart(e) {
@@ -146,6 +149,11 @@ class SchedulerEvent extends React.Component {
         };
         this.dragHandler.area.addEventListener('mousemove', move);
         this.dragHandler.area.addEventListener('mouseup', up);
+    }
+
+    openEvent(e) {
+        e.preventDefault();
+        console.log(e)
     }
 }
 
