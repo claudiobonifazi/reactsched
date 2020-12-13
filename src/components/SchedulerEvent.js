@@ -1,28 +1,36 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Scheduler from "./Scheduler.js";
 
 import "./SchedulerEvent.css";
 
 
-class SchedulerEvent extends React.Component{
+class SchedulerEvent extends React.Component {
 
     static defaultProps = {
+        id: 0,
         title: "",
         text: "",
         dateStart: null,
         dateEnd: null,
         bgColor: "dodgerblue",
         txtColor: "white",
-        idColumn: 0
+        idColumn: 0,
+        onResize: null,
+        onDrag: null
     };
 
     static propTypes = {
+        id: PropTypes.number,
         title: PropTypes.string,
         text: PropTypes.string,
         dateStart: PropTypes.string,
         dateEnd: PropTypes.string,
         bgColor: PropTypes.string,
-        txtColor: PropTypes.string
+        txtColor: PropTypes.string,
+        idColumn: PropTypes.number,
+        onResize: PropTypes.func,
+        onDrag: PropTypes.func
     };
 
     state = {
@@ -30,37 +38,118 @@ class SchedulerEvent extends React.Component{
         error: ""
     };
 
-    render(){
-        let html = (<>
-            <div className="rse_event" style={this.functionalCSS()}>
+    resizeHandler = {
+        area: document.documentElement,
+        startY: 0
+    };
 
-            </div>
-        </>);
+    dragHandler = {
+        area: document.documentElement
+    };
+
+    render() {
+        let html;
+        if (!this.state.error) {
+            html = (<>
+                <div className="rse_event" style={this.functionalCSS()} data-id={this.props.id}>
+                    <div className="rse_title rse_dragHandle" onMouseDown={this.dragStart.bind(this)}>
+                        {this.props.title || ''}
+                    </div>
+                    <div className="rse_text">{this.props.text || ''}</div>
+                    <div className="rse_resizeHandle" onMouseDown={this.resizeStart.bind(this)} />
+                </div>
+            </>);
+        } else {
+            html = (<>
+                <div className="rse_event rse_error" style={this.functionalCSS()}>
+                    <div className="rse_title">{this.state.error}</div>
+                    <div className="rse_text">{JSON.stringify(this.props, null, 4)}</div>
+                </div>
+            </>);
+        }
         return html;
     }
 
 
-    functionalCSS(){
-        let top = 0;
+    functionalCSS() {
         let left = 0;
         let width = 100;
-        let height = this.calculateDuration();
+        let top = Scheduler.minDiff(
+            SchedulerEvent.getStartOfDay(this.props.dateStart),
+            this.props.dateStart
+        );
+        let height = Scheduler.minDiff(
+            this.props.dateStart,
+            this.props.dateEnd
+        );
         return {
             '--e-minheight': height,
-            '--e-w': width+"%",
-            '--e-startmin': top,
+            '--e-w': width + "%",
+            '--e-start-min': top,
             '--e-l': left,
             '--e-bgc': this.props.bgColor,
             '--e-txtc': this.props.txtColor
         };
     }
 
-    calculateDuration(){
-        let d1 = new Date(this.props.dateStart);
-        let d2 = new Date(this.props.dateEnd);
-        let diffTime = Math.abs( d2 - d1 );
-        return diffTime / (1000*60);
+    componentDidUpdate(prevProps, prevState) {
+        if (new Date(this.props.dateEnd) <= new Date(this.props.dateStart)) {
+            this.state.error = "dateEnd lower than dateStart";
+        }
+    }
+
+    static getStartOfDay(d) {
+        let start = new Date(d);
+        start.setHours(0, 0, 0, 0);
+        return start.toISOString();
+    }
+
+    resizeStart(e) {
+        this.resizeHandler.startY = e.clientY;
+        let container = e.target.closest('.rse_event');
+        let move = em => {
+            let rect = container.getBoundingClientRect();
+            let px = em.clientY - rect.bottom;
+            if (em.clientY <= rect.y) {
+                px = 0;
+            }
+            if (typeof this.props.onResize === 'function') {
+                this.props.onResize(this, px);
+            }
+        };
+        let up = eu => {
+            this.resizeHandler.area.removeEventListener('mousemove', move);
+            this.resizeHandler.area.removeEventListener('mouseup', up);
+        };
+        this.resizeHandler.area.addEventListener('mousemove', move);
+        this.resizeHandler.area.addEventListener('mouseup', up);
+    }
+
+    dragStart(e) {
+        this.resizeHandler.startY = e.clientY;
+        let container = e.target.closest('.rse_event');
+        let evId = container.dataset.id;
+        let move = em => {
+            let rect = container.getBoundingClientRect();
+            if (rect.y === 0) {
+                container = em.target.closest('.rs_container').querySelector('.rse_event[data-id="' + evId + '"]');
+                rect = container.getBoundingClientRect();
+            }
+            let px = em.clientY - rect.y;
+            if (typeof this.props.onDrag === 'function') {
+                this.props.onDrag(this, em, px);
+            }
+        };
+        let up = eu => {
+            this.dragHandler.area.removeEventListener('mousemove', move);
+            this.dragHandler.area.removeEventListener('mouseup', up);
+        };
+        this.dragHandler.area.addEventListener('mousemove', move);
+        this.dragHandler.area.addEventListener('mouseup', up);
     }
 }
+
+
+
 
 export default SchedulerEvent;

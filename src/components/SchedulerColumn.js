@@ -5,18 +5,20 @@ import "./SchedulerColumn.css";
 import SchedulerEvent from './SchedulerEvent';
 
 
-class SchedulerColumn extends React.Component{
+class SchedulerColumn extends React.Component {
 
     static defaultProps = {
         id: 0,
         name: "",
-        events: []
+        events: [],
+        onEventResize: null
     };
 
     static propTypes = {
         id: PropTypes.number,
         name: PropTypes.string,
-        events: PropTypes.array
+        events: PropTypes.array,
+        onEventResize: PropTypes.func
     };
 
     state = {
@@ -24,11 +26,14 @@ class SchedulerColumn extends React.Component{
         error: ""
     };
 
-    render(){
+    render() {
         let html = (<>
-            <div className="rsc_column" style={this.functionalCSS()}>
-                {this.props.events.map((e,i)=>
-                    <SchedulerEvent key={i} {...e} />
+            <div className="rsc_column" style={this.functionalCSS()} data-id={this.props.id}>
+                {this.props.events.map((e, i) =>
+                    <SchedulerEvent key={i} {...e}
+                        onResize={this.props.onEventResize}
+                        onDrag={this.props.onEventDrag}
+                    />
                 )}
             </div>
         </>);
@@ -36,9 +41,9 @@ class SchedulerColumn extends React.Component{
     }
 
 
-    functionalCSS(){
+    functionalCSS() {
         return {
-            '--colname': '"'+this.props.name+'"'
+            '--colname': '"' + this.props.name + '"'
         };
     }
 }

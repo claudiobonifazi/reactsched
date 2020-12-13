@@ -1,12 +1,68 @@
 .rse_event{
+    --e-h: calc( 
+            var(--step-h) * var(--e-minheight) / var(--step-min)
+        );
+    --e-t: calc( 
+            var(--step-h) * var(--e-start-min) / var(--step-min)
+        );
     position: absolute;
     left: 0;
     top:0;
     width: var(--e-w);
-    height: calc( 
-                var(--step-h) * var(--e-minheight) / var(--step-min)
-            );
+    height: var(--e-h);
     transform: translate( var(--e-l), var(--e-t) );
     background-color: var(--e-bgc);
     color: var(--e-txtc);
+    display: grid;
+    grid-template-rows: max-content auto 5px;
+    row-gap: 4px;
+    border-radius: 2px;
+}
+
+.rse_title,
+.rse_text{
+    overflow:hidden;
+    contain: layout;
+    text-overflow: ellipsis;
+    user-select:none
+}
+
+.rse_title{
+    text-align: center;
+    font-weight:bold;
+    white-space: nowrap;
+}
+
+.rse_dragHandle{
+    cursor: grab;
+}
+
+.rse_text{
+    font-style: italic;
+    padding: 0 4px;
+    font-size: 85%;
+    white-space: pre-wrap;
+}
+
+.rse_resizeHandle{
+    cursor: ns-resize;
+}
+
+.rse_error{
+    background: crimson !important;
+    color: white !important;
+}
+
+.rse_error::before{
+    content: "EVENT ERROR";
+    position: absolute;
+    left:0;
+    top: -1.125em;
+    font-size: 66.67%;
+    background: crimson;
+    color: white;
+    padding: 0.125em;
+    font-weight: bold;
+    border-radius: 3px 3px 0 0;
+    line-height: 1;
 }

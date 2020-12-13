@@ -2,10 +2,15 @@
     position: relative;
     display: grid;
     grid-template-columns: var(--leftcol-w) auto;
-    padding-top: calc( var(--step-h) * 1.5 );
+    /*padding-top: calc( var(--step-h) * 1.5 );*/
+    height: var(--height);
 
     overflow-x:hidden;
     overflow-y:auto;
+}
+
+.rs_container>*{
+    margin-top: calc( var(--step-h) * 1.5 );
 }
 
 .rs_container .rs_leftCol{
